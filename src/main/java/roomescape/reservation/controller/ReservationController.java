@@ -1,10 +1,12 @@
-package roomescape.controller;
+package roomescape.reservation.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.domain.Reservation;
-import roomescape.service.ReservationService;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.service.ReservationService;
 
 import java.net.URI;
 import java.util.List;
@@ -21,9 +23,9 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<Reservation> create(@RequestBody Reservation reservation) {
-        Reservation createdReservation = reservationService.create(reservation);
-        return ResponseEntity.created(URI.create("/reservations/" + createdReservation.getId())).build();
+    public ResponseEntity<ReservationResponse> create(@RequestBody ReservationRequest request) {
+        ReservationResponse response = reservationService.create(request);
+        return ResponseEntity.created(URI.create("/reservations" + response.getId())).build();
     }
 
     @GetMapping

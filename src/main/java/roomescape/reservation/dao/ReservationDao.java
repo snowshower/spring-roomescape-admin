@@ -1,10 +1,11 @@
-package roomescape.dao;
+package roomescape.reservation.dao;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservationtime.domain.ReservationTime;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
@@ -22,7 +23,7 @@ public class ReservationDao {
 
     public Long save(Reservation reservation) {
         String sql = """
-                INSERT INTO reservation (name, date, time) values (?, ?, ?)
+                INSERT INTO reservation (name, date, time_id) VALUES (?, ?, ?)
                 """;
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -30,7 +31,7 @@ public class ReservationDao {
                     sql, new String[]{"id"});
             ps.setString(1, reservation.getName());
             ps.setObject(2, reservation.getDate());
-            ps.setObject(3, reservation.getTime());
+            ps.setLong(3, reservation.getTime().getId());
             return ps;
         }, keyHolder);
 
@@ -39,14 +40,24 @@ public class ReservationDao {
 
     public List<Reservation> findAll() {
         String sql = """
-                SELECT * FROM reservation
+                SELECT r.id as reservation_id,
+                       r.name,
+                       r.date,
+                       t.id as time_id,
+                       t.start_at
+                FROM reservation as r 
+                INNER JOIN reservation_time as t ON r.time_id=t.id
                 """;
         return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
+            ReservationTime time = new ReservationTime(
+                    resultSet.getLong("time_id"),
+                    resultSet.getObject("start_at", LocalTime.class)
+            );
             return new Reservation(
-                    resultSet.getLong("id"),
+                    resultSet.getLong("reservation_id"),
                     resultSet.getString("name"),
                     resultSet.getObject("date", LocalDate.class),
-                    resultSet.getObject("time", LocalTime.class)
+                    time
             );
         });
     }
