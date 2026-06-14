@@ -15,7 +15,7 @@ import java.util.Objects;
 
 @Repository
 public class ReservationDao {
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     public ReservationDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -62,10 +62,20 @@ public class ReservationDao {
         });
     }
 
-    public void delete(Long id) {
+    public boolean existsByTimeId(Long timeId) {
+        String sql = """
+                SELECT COUNT(*) FROM reservation WHERE time_id = ?
+                """;
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
+
+        return count != null && count > 0;
+    }
+
+    public int delete(Long id) {
         String sql = """
                 DELETE FROM reservation WHERE id = ?
                 """;
-        jdbcTemplate.update(sql, id);
+
+        return jdbcTemplate.update(sql, id);
     }
 }

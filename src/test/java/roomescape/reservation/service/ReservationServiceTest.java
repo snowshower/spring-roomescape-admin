@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
@@ -58,14 +57,14 @@ public class ReservationServiceTest {
         reservationService.create(request2);
 
         // when
-        List<Reservation> reservations = reservationService.read();
+        List<ReservationResponse> responses = reservationService.read();
 
         // then
         assertAll(
-                () -> assertThat(reservations).isNotNull(),
-                () -> assertThat(reservations).hasSize(2),
-                () -> assertThat(reservations.get(0).getName()).isEqualTo("예약1"),
-                () -> assertThat(reservations.get(1).getName()).isEqualTo("예약2")
+                () -> assertThat(responses).isNotNull(),
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses.get(0).getName()).isEqualTo("예약1"),
+                () -> assertThat(responses.get(1).getName()).isEqualTo("예약2")
         );
     }
 
@@ -81,9 +80,9 @@ public class ReservationServiceTest {
 
         // when
         reservationService.delete(id);
-        List<Reservation> reservations = reservationService.read();
+        List<ReservationResponse> responses = reservationService.read();
 
         // then
-        assertThat(reservations).isEmpty();
+        assertThat(responses).isEmpty();
     }
 }

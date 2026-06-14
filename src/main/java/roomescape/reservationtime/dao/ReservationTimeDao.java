@@ -1,6 +1,6 @@
 package roomescape.reservationtime.dao;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -11,12 +11,12 @@ import java.sql.PreparedStatement;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 public class ReservationTimeDao {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     public ReservationTimeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -39,7 +39,7 @@ public class ReservationTimeDao {
 
     public List<ReservationTime> findAll() {
         String sql = """
-                SELECT * FROM reservation_time
+                SELECT id, start_at FROM reservation_time
                 """;
         return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
             return new ReservationTime(
@@ -49,22 +49,26 @@ public class ReservationTimeDao {
         });
     }
 
-    public ReservationTime findById(Long id) {
+    public Optional<ReservationTime> findById(Long id) {
         String sql = """
-                SELECT * FROM reservation_time WHERE id = ?
+                SELECT id, start_at FROM reservation_time WHERE id = ?
                 """;
-        return jdbcTemplate.queryForObject(sql, (resultSet, rowNum) -> {
-            return new ReservationTime(
-                    resultSet.getLong("id"),
-                    resultSet.getObject("start_at", LocalTime.class)
-            );
-        }, id);
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, (resultSet, rowNum) -> {
+                return new ReservationTime(
+                        resultSet.getLong("id"),
+                        resultSet.getObject("start_at", LocalTime.class)
+                );
+            }, id));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
-    public void delete(Long id) {
+    public int delete(Long id) {
         String sql = """
                 DELETE FROM reservation_time WHERE id = ?
                 """;
-        jdbcTemplate.update(sql, id);
+        return jdbcTemplate.update(sql, id);
     }
 }

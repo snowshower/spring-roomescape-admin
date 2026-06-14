@@ -43,7 +43,7 @@ public class ReservationTimeServiceTest {
         reservationTimeService.create(request2);
 
         // when
-        List<ReservationTime> times = reservationTimeService.read();
+        List<ReservationTimeResponse> times = reservationTimeService.read();
 
         // then
         assertAll(
@@ -64,7 +64,7 @@ public class ReservationTimeServiceTest {
 
         // when
         reservationTimeService.delete(id);
-        List<ReservationTime> times = reservationTimeService.read();
+        List<ReservationTimeResponse> times = reservationTimeService.read();
 
         // then
         assertThat(times).isEmpty();
